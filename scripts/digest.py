@@ -35,12 +35,16 @@ def main():
         print("今天没有发现与关键词相关的论文。")
         return
 
-    # 3. Generate Report Text (简洁版)
-    report = "arXiv 每日物理论文简报 (由 AI 生成)\n\n"
+    # 3. Generate Report Text (包含摘要版)
+    report = "arXiv 每日物理论文简报 (由 AI 生成)\n"
+    report += "=" * 40 + "\n\n"
+    
     for idx, p in enumerate(matched_papers):
-        report += f"{idx+1}. {p['title']}\n"
+        report += f"[{idx+1}] {p['title']}\n"
         report += f"   链接: {p['link']}\n"
-        report += f"   匹配关键词: {', '.join(p['keywords'])}\n\n"
+        report += f"   匹配关键词: {', '.join(p['keywords'])}\n"
+        report += f"   摘要: {p['summary']}\n"
+        report += "-" * 40 + "\n\n"
 
     # 4. Send via AppleScript
     print(f"正在发送至 {', '.join(config['recipients'])}...")
