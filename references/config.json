@@ -1,17 +1,18 @@
 {
   "keywords": [
-    "unconventional superconductors", 
-    "heavy fermion materials", 
-    "topology", 
-    "machine learning", 
-    "非常规超导体", 
-    "重费米子材料", 
-    "拓扑", 
-    "机器学习",
+    "quantum materials",
+    "superconductor",
+    "unconventional superconductors",
+    "heavy fermion",
+    "topological superconductors",
+    "machine learning",
     "UTe2",
     "UTe_2",
     "UTe_{2}"
   ],
-  "recipients": ["zhuolunqiu@gmail.com", "809425901@qq.com"],
+  "recipients": [
+    "zhuolunqiu@gmail.com",
+    "809425901@qq.com"
+  ],
   "category": "cond-mat"
 }
