@@ -3,7 +3,9 @@ name: arxiv-physics-digest
 description: 抓取 arXiv 的 cond-mat RSS，按关键词筛选论文并生成每日简报；可选生成 Typst PDF 和首图预览，并通过 macOS Mail 自动发送。用户提到“arXiv 每日追踪/论文简报/关键词筛选/自动邮件推送”时使用。
 ---
 
-# arXiv Physics Digest
+# ArxivReading Agent
+
+仓库项目名使用 `ArxivReading Agent`，技能标识保持为 `arxiv-physics-digest`。
 
 按下面流程执行：
 
@@ -31,7 +33,7 @@ python3 scripts/digest.py --rss-file assets/sample_rss.xml --skip-email --skip-p
 ## 定时任务示例（每天 08:30）
 
 ```bash
-30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/arxiv-physics-digest/scripts/digest.py >> /absolute/path/to/arxiv-physics-digest/log.txt 2>&1
+30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/ArxivReading-agent/scripts/digest.py >> /absolute/path/to/ArxivReading-agent/log.txt 2>&1
 ```
 
 ## 依赖与降级行为

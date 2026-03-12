@@ -1,4 +1,6 @@
-# ArXiv Physics Digest
+# ArxivReading Agent
+
+`ArxivReading Agent` 是这个仓库的项目名，技能标识保持为 `arxiv-physics-digest`。
 
 用于自动追踪 arXiv `cond-mat` 分类，按关键词筛选论文，并通过文本邮件或带附件 PDF 的形式发送每日简报。
 
@@ -53,7 +55,7 @@ cp references/config.example.json references/config.json
     "port": 465,
     "username": "your-account@qq.com",
     "sender": "your-account@qq.com",
-    "sender_name": "arXiv Digest",
+    "sender_name": "ArxivReading Agent",
     "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
     "use_ssl": true,
     "starttls": false
@@ -129,7 +131,7 @@ python3 scripts/test_pdf.py
 `cron` 示例，表示每天 `08:30` 运行：
 
 ```bash
-30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/arxiv-physics-digest/scripts/digest.py >> /absolute/path/to/arxiv-physics-digest/log.txt 2>&1
+30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/ArxivReading-agent/scripts/digest.py >> /absolute/path/to/ArxivReading-agent/log.txt 2>&1
 ```
 
 注意：

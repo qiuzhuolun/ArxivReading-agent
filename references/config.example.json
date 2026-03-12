@@ -19,7 +19,7 @@
     "port": 465,
     "username": "your-account@qq.com",
     "sender": "your-account@qq.com",
-    "sender_name": "arXiv Digest",
+    "sender_name": "ArxivReading Agent",
     "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
     "use_ssl": true,
     "starttls": false

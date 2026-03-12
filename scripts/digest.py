@@ -450,7 +450,7 @@ def main():
             run_logger.close()
             return 1
 
-        subject = f"【SMTP 测试】arXiv Digest {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        subject = f"【SMTP 测试】ArxivReading Agent {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         body_lines = [
             "这是一封 SMTP 诊断测试邮件。",
             "",
