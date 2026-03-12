@@ -1,37 +1,42 @@
 ---
 name: arxiv-physics-digest
-description: 自动抓取 arXiv 凝聚态物理分类的最新论文，并根据“超导体”、“拓扑”等关键词筛选、总结，最后通过 macOS Mail 应用发送每日简报给指定邮箱。
+description: 抓取 arXiv 的 cond-mat RSS，按关键词筛选论文并生成每日简报；可选生成 Typst PDF 和首图预览，并通过 macOS Mail 自动发送。用户提到“arXiv 每日追踪/论文简报/关键词筛选/自动邮件推送”时使用。
 ---
 
-# arXiv Physics Digest 技能
+# arXiv Physics Digest
 
-这个技能模仿了 `labAgent` 的工作流，专为物理研究人员提供每日论文情报。
+按下面流程执行：
 
-## 核心功能
-1. **自动抓取**: 访问 arXiv API 获取凝聚态物理 (cond-mat) 的最新论文。
-2. **关键词匹配**: 基于 `references/config.json` 中的关键词进行全文筛选。
-3. **邮件分发**: 自动调用 macOS 的 Mail 应用发送汇总报告。
+1. 复制 `references/config.example.json` 为 `references/config.json`，再设置 `keywords`、`recipients`、`category`。
+2. 运行 `python3 scripts/digest.py` 生成并发送简报。
+3. 若仅做测试，运行无副作用模式：`python3 scripts/digest.py --skip-email --skip-pdf`。
 
-## 如何使用
+## 关键命令
 
-### 1. 手动生成简报
-如果您想现在就获取一份简报，可以运行：
+- 正常运行：
 ```bash
 python3 scripts/digest.py
 ```
 
-### 2. 修改搜索关键词或收件人
-编辑 `references/config.json` 文件：
-- `keywords`: 添加或删除您关注的研究方向（如 "Majorana", "Superconductivity"）。
-- `recipients`: 在数组中添加多个邮箱地址。
-
-### 3. 设置定时发送 (每天早上 9 点)
-在终端输入 `crontab -e`，并添加以下行：
+- 离线自检（无需网络、不会发邮件）：
 ```bash
-0 9 * * * /usr/bin/python3 /Users/qiuzhuolun/arxiv-physics-digest/scripts/digest.py >> /Users/qiuzhuolun/arxiv-physics-digest/log.txt 2>&1
+python3 scripts/test_pdf.py
 ```
 
-## 依赖
-- 需要 macOS 系统。
-- 需要在“邮件”应用中配置好发件账户。
-- 无需第三方 Python 库，使用标准库运行。
+- 使用本地 RSS 文件调试：
+```bash
+python3 scripts/digest.py --rss-file assets/sample_rss.xml --skip-email --skip-pdf
+```
+
+## 定时任务示例（每天 08:30）
+
+```bash
+30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/arxiv-physics-digest/scripts/digest.py >> /absolute/path/to/arxiv-physics-digest/log.txt 2>&1
+```
+
+## 依赖与降级行为
+
+- 必需：`python3`。
+- 可选：`typst`（生成 PDF）。未安装时自动跳过 PDF。
+- 可选：`PyMuPDF` (`fitz`)（从 PDF 提取首图）。未安装时 PDF 仍可生成，但不含提取图。
+- 发送邮件优先使用 SMTP；未配置 SMTP 时可回退到 macOS Mail + `osascript`。

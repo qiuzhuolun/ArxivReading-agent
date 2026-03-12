@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>arXiv.org cond-mat recent submissions</title>
+    <item>
+      <title>Title: Machine learning insights for unconventional superconductors</title>
+      <link>http://arxiv.org/abs/2603.12345v1</link>
+      <description><![CDATA[
+arXiv:2603.12345v1 Announce Type: new
+Abstract: We study heavy fermion systems and topological superconductors with machine learning methods.
+      ]]></description>
+    </item>
+    <item>
+      <title>Title: Thermal transport in frustrated magnets</title>
+      <link>http://arxiv.org/abs/2603.54321v1</link>
+      <description><![CDATA[
+Abstract: We discuss spin liquids and thermal Hall transport.
+      ]]></description>
+    </item>
+  </channel>
+</rss>

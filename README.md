@@ -1,46 +1,86 @@
-# ArXiv Physics Digest (Agentic Skill)
+# ArXiv Physics Digest
 
-这是一个专为物理研究人员设计的 **arXiv 论文自动追踪与简报系统**。它最初是作为 `Gemini CLI` 的一个自定义技能（Skill）开发的，旨在通过代理（Agent）自动化日常科研情报的搜集工作。
+用于自动追踪 arXiv `cond-mat` 分类、按关键词筛选并发送每日简报。
 
-## 🌟 核心功能
-- **自动抓取**：每日自动从 arXiv 获取最新的凝聚态物理 (cond-mat) 论文。
-- **智能筛选**：基于自定义关键词（如：非常规超导体、重费米子、拓扑、机器学习等）进行全文扫描。
-- **邮件推送**：利用 AppleScript 驱动 macOS Mail 应用自动发送格式整齐的每日汇总。
-- **轻量化**：完全基于 Python 标准库，无需安装复杂的第三方依赖。
+## 项目结构
 
-## 📂 项目结构
-- `scripts/digest.py`: 核心逻辑脚本（抓取、筛选、发送）。
-- `references/config.json`: 配置文件（关键词、收件人列表）。
-- `SKILL.md`: Gemini CLI 技能定义文件。
+- `scripts/digest.py`: 主流程（抓取 RSS、筛选、可选生成 PDF、可选发邮件）
+- `scripts/test_pdf.py`: 安全自检脚本（默认离线、不会发邮件）
+- `references/config.example.json`: 配置模板
+- `assets/sample_rss.xml`: 离线测试用 RSS 样例
+- `SKILL.md`: skill 使用说明
 
-## 🚀 快速开始
+## 依赖
 
-### 1. 配置
-编辑 `references/config.json`，设置您的研究兴趣和接收邮箱：
+- 必需：`python3`
+- 可选：`typst`（用于生成 PDF）
+- 可选：`PyMuPDF`（Python 包名 `PyMuPDF`，模块名 `fitz`，用于提取论文首图）
+- 可选：macOS Mail（未配置 SMTP 时可回退到 AppleScript 发送）
+
+安装可选依赖示例：
+
+```bash
+python3 -m pip install PyMuPDF
+brew install typst
+```
+
+## 配置
+
+先复制模板：
+
+```bash
+cp references/config.example.json references/config.json
+```
+
+然后编辑 `references/config.json`：
+
 ```json
 {
-  "keywords": ["topology", "superconductors"],
-  "recipients": ["your-email@example.com"]
+  "keywords": ["topological superconductors", "machine learning"],
+  "recipients": ["your-email@example.com"],
+  "category": "cond-mat",
+  "smtp": {
+    "host": "smtp.qq.com",
+    "port": 465,
+    "username": "your-account@qq.com",
+    "sender": "your-account@qq.com",
+    "sender_name": "arXiv Digest",
+    "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
+    "use_ssl": true,
+    "starttls": false
+  }
 }
 ```
 
-### 2. 手动运行
+说明：
+
+- `references/config.json` 已加入 `.gitignore`，不会提交到仓库。
+- 建议优先使用 `smtp.password_env` 或 `smtp.password_keychain_server`，不要把授权码直接写进 Git 版本库。
+
+## 使用
+
+- 正常运行：
 ```bash
 python3 scripts/digest.py
 ```
 
-### 3. 设置定时任务 (macOS)
-在终端输入 `crontab -e` 并添加以下内容以实现每天早上 9 点自动运行：
+- 只生成文本流程（不发邮件、不生成 PDF）：
 ```bash
-0 9 * * * /usr/bin/python3 /绝对路径/to/arxiv-physics-digest/scripts/digest.py
+python3 scripts/digest.py --skip-email --skip-pdf
 ```
 
-## 🤖 作为 Gemini CLI 技能使用
-如果您安装了 [Gemini CLI](https://github.com/google/gemini-cli)，您可以直接将其作为技能加载，从而通过自然语言与之交互。
-
+- 使用本地 RSS 离线测试：
 ```bash
-gemini skills install arxiv-physics-digest.skill --scope user
+python3 scripts/digest.py --rss-file assets/sample_rss.xml --skip-email --skip-pdf
 ```
 
-## 📄 开源协议
-MIT
+- 执行项目自检：
+```bash
+python3 scripts/test_pdf.py
+```
+
+## 定时任务（macOS，示例为每天 08:30）
+
+```bash
+30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/arxiv-physics-digest/scripts/digest.py >> /absolute/path/to/arxiv-physics-digest/log.txt 2>&1
+```

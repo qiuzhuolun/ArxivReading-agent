@@ -1,0 +1,27 @@
+{
+  "keywords": [
+    "quantum materials",
+    "superconductor",
+    "unconventional superconductors",
+    "heavy fermion",
+    "topological superconductors",
+    "machine learning",
+    "UTe2",
+    "UTe_2",
+    "UTe_{2}"
+  ],
+  "recipients": [
+    "your-email@example.com"
+  ],
+  "category": "cond-mat",
+  "smtp": {
+    "host": "smtp.qq.com",
+    "port": 465,
+    "username": "your-account@qq.com",
+    "sender": "your-account@qq.com",
+    "sender_name": "arXiv Digest",
+    "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
+    "use_ssl": true,
+    "starttls": false
+  }
+}
