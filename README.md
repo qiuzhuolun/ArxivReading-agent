@@ -1,60 +1,108 @@
 # ArxivReading Agent
 
-`ArxivReading Agent` 是这个仓库的项目名，技能标识保持为 `arxiv-physics-digest`。
+Track new arXiv papers from a chosen RSS category, filter them by keywords, and send yourself a daily digest by email.
 
-用于自动追踪 arXiv `cond-mat` 分类，按关键词筛选论文，并通过文本邮件或带附件 PDF 的形式发送每日简报。
+The default use case is `cond-mat`, but the script works with any arXiv RSS category such as `hep-th`, `cs.LG`, or `math.PR`.
 
-## 功能
+## Features
 
-- 从 `https://rss.arxiv.org/rss/<category>` 抓取最新 RSS。
-- 根据标题和摘要中的关键词筛选论文。
-- 可选下载论文 PDF，并用 `PyMuPDF` 提取首张合适图片。
-- 可选用 `Typst` 生成排版后的 PDF 简报。
-- 优先使用 SMTP 发送邮件；未配置 SMTP 时可回退到 macOS Mail + AppleScript。
-- 提供离线样例 RSS 和自检脚本，便于无副作用调试。
+- Fetch the latest feed from `https://rss.arxiv.org/rss/<category>`.
+- Match papers by keywords in title and abstract.
+- Send a plain-text digest by SMTP.
+- Fall back to macOS Mail + AppleScript if SMTP is not configured.
+- Optionally download matched PDFs and render a formatted digest with Typst.
+- Optionally extract the first useful paper figure with `PyMuPDF`.
+- Include an offline sample RSS file and a safe self-check script.
 
-## 项目结构
+## Quick Start
 
-- `scripts/digest.py`: 主流程（抓取 RSS、筛选、可选生成 PDF、可选发邮件）
-- `scripts/test_pdf.py`: 安全自检脚本（默认离线、不会发邮件）
-- `references/config.example.json`: 配置模板
-- `assets/sample_rss.xml`: 离线测试用 RSS 样例
-- `SKILL.md`: skill 使用说明
-
-## 依赖
-
-- 必需：`python3`
-- 可选：`typst`（用于生成 PDF）
-- 可选：`PyMuPDF`（Python 包名 `PyMuPDF`，模块名 `fitz`，用于提取论文首图）
-- 可选：macOS Mail（未配置 SMTP 时可回退到 AppleScript 发送）
-
-安装可选依赖示例：
+1. Clone the repository and enter it.
 
 ```bash
-python3 -m pip install PyMuPDF
-brew install typst
+git clone https://github.com/qiuzhuolun/ArxivReading-agent.git
+cd ArxivReading-agent
 ```
 
-## 配置
+2. Create a Python environment and install the optional Python dependency.
 
-先复制模板：
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -U pip
+python3 -m pip install -r requirements.txt
+```
+
+3. Copy the config template.
 
 ```bash
 cp references/config.example.json references/config.json
 ```
 
-然后编辑 `references/config.json`：
+4. Run the offline self-check. This does not fetch live data and does not send email.
+
+```bash
+python3 scripts/test_pdf.py
+```
+
+5. Run a live text-only test.
+
+```bash
+python3 scripts/digest.py --skip-email --skip-pdf --max-papers 3
+```
+
+6. When the output looks right, enable email sending.
+
+```bash
+python3 scripts/digest.py
+```
+
+## Platform Support
+
+- Cross-platform: RSS fetching, keyword filtering, SMTP email sending, text-only mode.
+- Cross-platform with extra tools: Typst PDF rendering and `PyMuPDF` image extraction.
+- macOS-only: Mail.app fallback via `osascript`, password lookup via Keychain `security`.
+
+If you want the most portable setup, use SMTP and keep Mail.app fallback disabled.
+
+## Installation Notes
+
+Required:
+
+- `python3` 3.9+
+
+Optional:
+
+- `PyMuPDF` for extracting the first figure from matched paper PDFs
+- `typst` for generating a formatted PDF digest
+
+Install Typst separately if you want PDF output:
+
+```bash
+brew install typst
+```
+
+## Configuration
+
+`references/config.json` is ignored by Git and safe to keep local.
+
+Start from the template:
+
+```bash
+cp references/config.example.json references/config.json
+```
+
+Example full config:
 
 ```json
 {
-  "keywords": ["topological superconductors", "machine learning"],
+  "keywords": ["quantum materials", "spin liquid", "machine learning"],
   "recipients": ["your-email@example.com"],
   "category": "cond-mat",
   "smtp": {
-    "host": "smtp.qq.com",
+    "host": "smtp.example.com",
     "port": 465,
-    "username": "your-account@qq.com",
-    "sender": "your-account@qq.com",
+    "username": "your-account@example.com",
+    "sender": "your-account@example.com",
     "sender_name": "ArxivReading Agent",
     "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
     "use_ssl": true,
@@ -63,79 +111,90 @@ cp references/config.example.json references/config.json
 }
 ```
 
-说明：
+Example minimal config for `--smtp-only`:
 
-- `references/config.json` 已加入 `.gitignore`，不会提交到仓库。
-- 建议优先使用 `smtp.password_env` 或 `smtp.password_keychain_server`，不要把授权码直接写进 Git 版本库。
-- 如果没有 `smtp` 配置，脚本会尝试通过 macOS `Mail` 应用发送。
-
-常用配置项：
-
-- `keywords`: 用于匹配标题和摘要的关键词列表。
-- `recipients`: 收件人邮箱列表。
-- `category`: RSS 分类，当前默认使用 `cond-mat`。
-- `smtp.password_env`: 从环境变量读取 SMTP 授权码。
-- `smtp.password_keychain_server`: 从 macOS Keychain 读取互联网密码。
-
-## 使用
-
-- 正常运行：
-```bash
-python3 scripts/digest.py
+```json
+{
+  "recipients": ["your-email@example.com"],
+  "smtp": {
+    "host": "smtp.example.com",
+    "port": 465,
+    "username": "your-account@example.com",
+    "sender": "your-account@example.com",
+    "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
+    "use_ssl": true
+  }
+}
 ```
 
-- 只生成文本流程（不发邮件、不生成 PDF）：
-```bash
-python3 scripts/digest.py --skip-email --skip-pdf
-```
+Important fields:
 
-- 正常抓取，但只测试 SMTP 发信：
-```bash
-python3 scripts/digest.py --smtp-only
-```
+- `keywords`: keyword list matched against title and abstract
+- `recipients`: recipient email addresses
+- `category`: arXiv RSS category, for example `cond-mat` or `cs.LG`
+- `smtp.password_env`: read the SMTP password from an environment variable
+- `smtp.password_keychain_server`: read the password from macOS Keychain
 
-- 开启 SMTP 调试日志：
-```bash
-python3 scripts/digest.py --smtp-debug --debug-log /tmp/arxiv_smtp_debug.log
-```
+Security notes:
 
-- 使用本地 RSS 离线测试：
-```bash
-python3 scripts/digest.py --rss-file assets/sample_rss.xml --skip-email --skip-pdf
-```
+- Prefer `smtp.password_env` or `smtp.password_keychain_server`.
+- Do not commit SMTP passwords into Git.
+- `references/config.json` is already in `.gitignore`.
 
-- 限制本次最多处理 3 篇论文：
-```bash
-python3 scripts/digest.py --max-papers 3
-```
+## Common Commands
 
-- 执行项目自检：
+Offline self-check:
+
 ```bash
 python3 scripts/test_pdf.py
 ```
 
-脚本参数摘要：
+Offline digest test with bundled sample RSS:
 
-- `--config`: 指定配置文件路径。
-- `--rss-file`: 使用本地 RSS 文件调试。
-- `--output-dir`: 指定工作目录，默认 `/tmp/arxiv_digest`。
-- `--skip-pdf`: 跳过 PDF 下载、图片提取和 Typst 渲染。
-- `--skip-email`: 跳过邮件发送。
-- `--smtp-only`: 仅发送 SMTP 测试邮件。
-- `--smtp-debug`: 生成 SMTP 诊断日志。
-- `--debug-log`: 显式指定诊断日志路径。
-- `--max-papers`: 限制处理的匹配论文数量。
+```bash
+python3 scripts/digest.py --rss-file assets/sample_rss.xml --skip-email --skip-pdf
+```
 
-## 定时任务
+Live fetch, no email, no PDF:
 
-`cron` 示例，表示每天 `08:30` 运行：
+```bash
+python3 scripts/digest.py --skip-email --skip-pdf --max-papers 3
+```
+
+SMTP connectivity test only:
+
+```bash
+python3 scripts/digest.py --smtp-only
+```
+
+Verbose SMTP diagnostics:
+
+```bash
+python3 scripts/digest.py --smtp-debug --debug-log /tmp/arxiv_smtp_debug.log
+```
+
+## Scheduling
+
+Example `cron` entry for daily execution at `08:30`:
 
 ```bash
 30 8 * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin /absolute/path/to/python3 /absolute/path/to/ArxivReading-agent/scripts/digest.py >> /absolute/path/to/ArxivReading-agent/log.txt 2>&1
 ```
 
-注意：
+Operational notes:
 
-- 到点时机器需要处于唤醒状态并联网。
-- 如果同时启用 `cron` 和 `launchd`，可能会重复发信。
-- 若某天没有收到邮件，先查看 `log.txt` 和 `--smtp-debug` 生成的诊断日志。
+- The machine must be awake and online at the scheduled time.
+- Do not enable both `cron` and `launchd` unless you want duplicate sends.
+- If delivery fails, inspect `log.txt` and any `--smtp-debug` output.
+
+## Repository Layout
+
+- `scripts/digest.py`: main entry point
+- `scripts/test_pdf.py`: safe self-check
+- `references/config.example.json`: starter config
+- `assets/sample_rss.xml`: offline sample feed
+- `SKILL.md`: Codex skill metadata, not required for normal use
+
+## License
+
+This project is released under the MIT License. See `LICENSE`.

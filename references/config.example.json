@@ -1,24 +1,21 @@
 {
   "keywords": [
     "quantum materials",
-    "superconductor",
-    "unconventional superconductors",
-    "heavy fermion",
     "topological superconductors",
+    "spin liquid",
+    "twisted bilayer graphene",
     "machine learning",
-    "UTe2",
-    "UTe_2",
-    "UTe_{2}"
+    "strongly correlated systems"
   ],
   "recipients": [
     "your-email@example.com"
   ],
   "category": "cond-mat",
   "smtp": {
-    "host": "smtp.qq.com",
+    "host": "smtp.example.com",
     "port": 465,
-    "username": "your-account@qq.com",
-    "sender": "your-account@qq.com",
+    "username": "your-account@example.com",
+    "sender": "your-account@example.com",
     "sender_name": "ArxivReading Agent",
     "password_env": "ARXIV_DIGEST_SMTP_PASSWORD",
     "use_ssl": true,

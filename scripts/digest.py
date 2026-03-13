@@ -122,23 +122,27 @@ def probe_ssl_endpoint(host, port, timeout, logger):
         return False
 
 
-def load_config(config_path):
+def load_config(config_path, smtp_only=False):
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
 
-    required = ["keywords", "recipients", "category"]
+    required = ["recipients"]
+    if not smtp_only:
+        required.extend(["keywords", "category"])
     missing = [k for k in required if k not in config]
     if missing:
         raise ValueError(f"配置文件缺少字段: {', '.join(missing)}")
 
-    if not isinstance(config["keywords"], list) or not all(isinstance(k, str) for k in config["keywords"]):
-        raise ValueError("`keywords` 必须是字符串数组")
-
     if not isinstance(config["recipients"], list) or not all(isinstance(r, str) for r in config["recipients"]):
         raise ValueError("`recipients` 必须是字符串数组")
 
-    if not isinstance(config["category"], str) or not config["category"].strip():
-        raise ValueError("`category` 必须是非空字符串")
+    if "keywords" in config:
+        if not isinstance(config["keywords"], list) or not all(isinstance(k, str) for k in config["keywords"]):
+            raise ValueError("`keywords` 必须是字符串数组")
+
+    if "category" in config:
+        if not isinstance(config["category"], str) or not config["category"].strip():
+            raise ValueError("`category` 必须是非空字符串")
 
     smtp = config.get("smtp")
     if smtp is not None:
@@ -417,7 +421,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        config = load_config(args.config)
+        config = load_config(args.config, smtp_only=args.smtp_only)
     except FileNotFoundError:
         print(
             "读取配置失败: 未找到配置文件。请先复制 "
@@ -449,6 +453,10 @@ def main():
             run_logger.log("未配置 `smtp`，无法执行 SMTP-only 测试。")
             run_logger.close()
             return 1
+        if not config["recipients"]:
+            run_logger.log("`recipients` 为空，无法执行 SMTP-only 测试。")
+            run_logger.close()
+            return 1
 
         subject = f"【SMTP 测试】ArxivReading Agent {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         body_lines = [
@@ -472,6 +480,12 @@ def main():
         run_logger.log("SMTP-only 测试失败。")
         run_logger.close()
         return 1
+
+    for key in ["keywords", "category"]:
+        if key not in config:
+            print(f"读取配置失败: 普通运行模式下缺少 `{key}` 字段。")
+            run_logger.close()
+            return 1
 
     if args.rss_file:
         print(f"正在读取本地 RSS 文件: {args.rss_file}")
